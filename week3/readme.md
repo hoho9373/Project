@@ -70,6 +70,6 @@
 <img width="806" alt="Image" src="https://github.com/user-attachments/assets/8866644d-dcef-43c1-89cb-ee743d55d41b" />
 
 
-## 메인 페이지 실행 시 화면
+## 🖼️ 미리보기 (스크린샷)
 <img width="1264" alt="Image" src="https://github.com/user-attachments/assets/d7818314-667d-4242-b418-e1eeac8cf508" />
 
