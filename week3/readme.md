@@ -8,10 +8,6 @@
 여행자와 미식가 모두에게 유용한 지역별 맛집 가이드로,  
 심플하고 직관적인 UI와 함께 지도로 위치까지 제공합니다.
 
-## 📸 데모 화면
-
-![메인화면 예시](images/screenshot-main.png) <!-- 필요 시 캡쳐 이미지 넣기 -->
-
 ---
 
 ## 🛠️ 사용 기술
@@ -23,11 +19,8 @@
 
 ---
 
-## 📁 프로젝트 구조
-
-
 - 지도 안내 아이콘:
-  🗺️ [images/free-icon-south-korea-4498545.png]
+  🗺️ 
   > 지역 버튼을 누르면 현지 맛집 리스트와 지도가 함께 제공돼요!
 
 
@@ -69,14 +62,5 @@
 </main>
 ```
 ## 최종 작성 코드
-![실습이미지](code1.png)
-![실습이미지](code2.png)
-![실습이미지](code3.png)
-
-
-
-
-
-
 
 <img width="608" alt="Image" src="https://github.com/user-attachments/assets/9f07241e-33d6-4afd-b8b0-b2e95b929e8e" />
