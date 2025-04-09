@@ -71,7 +71,6 @@
 </main>
 
 ## 최종 작성 코드
-
-![실습이미지](code1.png)
-![실습이미지](code2.png)
-![실습이미지](code3.png)
+![실습이미지](week3/code1.png)
+![실습이미지](week3/code2.png)
+![실습이미지](week3/code3.png)
