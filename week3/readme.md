@@ -72,3 +72,11 @@
 ![실습이미지](code1.png)
 ![실습이미지](code2.png)
 ![실습이미지](code3.png)
+
+
+
+
+
+
+
+<img width="608" alt="Image" src="https://github.com/user-attachments/assets/9f07241e-33d6-4afd-b8b0-b2e95b929e8e" />
