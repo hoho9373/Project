@@ -78,10 +78,10 @@
 
 ---
 
-## 🖼️ 미리보기 (스크린샷)
 
 ## 최종 작성 코드 
 
+```html
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -222,3 +222,10 @@
       allowfullscreen=""
       loading="lazy"
       referrerpolicy="no-referrer
+
+```
+## 🖼️ 미리보기 (스크린샷)
+
+<img width="1277" alt="Image" src="https://github.com/user-attachments/assets/42d5d9ae-806d-4a2a-a0db-3fd9ca8fb71a" />
+
+-부산, 전주, 제주, 강릉도 이와 같이 구현
