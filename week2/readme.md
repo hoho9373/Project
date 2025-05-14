@@ -1,7 +1,7 @@
 # 2주 - 웹사이트 구현 계획 작성
 
 ## 웹사이트 메인화면 구성
-<img width="821" alt="Image" src="https://github.com/user-attachments/assets/7a5c32e8-0afe-434b-bfa5-455455658d71" />
+
 
 ## 서울 페이지
 <img width="886" alt="Image" src="https://github.com/user-attachments/assets/8360896a-b9da-4439-bd0d-e84a9ce6b2d4" />
