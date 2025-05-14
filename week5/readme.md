@@ -5,86 +5,424 @@
 | 제안 | 왜 좋은가 | 힌트 |
 |------|-----------|------|
 | ✅ **여행 일정 로컬 저장/불러오기** | 새로고침·재방문 시 일정 보존 | `localStorage` 사용, 추후 Firebase Firestore 확장 |
+# 수정된 코드
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>📅 나만의 여행 일정 만들기</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Noto Sans KR', sans-serif;
+      background-color: #fff8f0;
+    }
 
+    header {
+      background-color: #ffab91;
+      color: #fff;
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 2rem;
+      font-weight: bold;
+      border-bottom: 4px dashed #ff7043;
+    }
 
-| ✅ **이미지 Lazy-Load** | 초기 로딩 속도 향상 | `<img loading="lazy">` |
-| ✅ **다국어 & 통화 변환** | 해외 유입 대비 | i18n JSON 구조, 환율 API 활용 |
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      padding: 1rem;
+      background-color: #ffe0b2;
+      flex-wrap: wrap;
+    }
+
+    nav a {
+      text-decoration: none;
+      color: #444;
+      font-weight: 600;
+      padding: 0.5rem 1rem;
+      background-color: #ffffff;
+      border-radius: 1.2rem;
+      transition: 0.2s;
+    }
+
+    nav a:hover {
+      background-color: #ffd180;
+    }
+
+    main {
+      max-width: 800px;
+      margin: auto;
+      padding: 2rem;
+    }
+
+    .day-section {
+      background-color: #fff;
+      border: 2px dashed #ffab91;
+      border-radius: 1rem;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      position: relative;
+    }
+
+    .day-section h2 {
+      color: #ff7043;
+      margin-bottom: 1rem;
+    }
+
+    .plan-list {
+      list-style: none;
+      padding-left: 1rem;
+    }
+
+    .plan-list li {
+      margin-bottom: 0.7rem;
+      position: relative;
+      padding-left: 1.2rem;
+    }
+
+    .plan-list li::before {
+      content: "🍀";
+      position: absolute;
+      left: 0;
+      top: 0;
+    }
+
+    .plan-list li button {
+      background: none;
+      border: none;
+      color: #ff7043;
+      font-size: 1.2rem;
+      position: absolute;
+      right: 0;
+      top: 0;
+      cursor: pointer;
+    }
+
+    .add-plan {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .add-plan input {
+      flex: 1;
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 0.5rem;
+    }
+
+    .add-plan button {
+      padding: 0.5rem 1rem;
+      background-color: #ffccbc;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .add-plan button:hover {
+      background-color: #ffab91;
+    }
+
+    .add-day-btn {
+      display: block;
+      margin: 2rem auto;
+      padding: 0.8rem 2rem;
+      background-color: #ff7043;
+      color: white;
+      font-size: 1rem;
+      border: none;
+      border-radius: 2rem;
+      cursor: pointer;
+    }
+
+    .add-day-btn:hover {
+      background-color: #f4511e;
+    }
+  </style>
+</head>
+<body>
+  <header>📅여행 planner</header>
+  <nav>
+    <a href="11.html">🏠 메인</a>
+    <a href="flights.html">✈️ 항공권</a>
+    <a href="hotel.html">🏨 호텔</a>
+    <a href="food.html">🍜 음식점</a>
+    <a href="attractions.html">🗺 관광지</a>
+    <a href="planner.html">📅 일정</a>
+  </nav>
+
+  <main>
+    <div id="planContainer"></div>
+    <button class="add-day-btn" onclick="addDay()">+ 하루 일정 추가</button>
+  </main>
+
+  <script>
+    let dayCount = 0;
+
+    // 새로고침 시 저장된 일정 불러오기
+    window.onload = function() {
+      const savedPlans = JSON.parse(localStorage.getItem('travelPlans'));
+      if (savedPlans) {
+        dayCount = savedPlans.length;
+        savedPlans.forEach((dayPlan, index) => {
+          addDay(dayPlan);
+        });
+      }
+    };
+
+    function addDay(savedPlan = null) {
+      dayCount++;
+      const container = document.getElementById("planContainer");
+
+      const section = document.createElement("div");
+      section.className = "day-section";
+      section.innerHTML = `
+        <h2>Day ${dayCount}</h2>
+        <ul class="plan-list" id="list${dayCount}"></ul>
+        <div class="add-plan">
+          <input type="text" id="input${dayCount}" placeholder="예: 오전 10시 — 에펠탑 방문" />
+          <button onclick="addPlan(${dayCount})">추가</button>
+        </div>
+      `;
+      container.appendChild(section);
+
+      // 이전에 저장된 계획이 있다면 로드
+      if (savedPlan) {
+        savedPlan.forEach(plan => addPlanToList(dayCount, plan));
+      }
+    }
+
+    function addPlan(day) {
+      const input = document.getElementById(`input${day}`);
+      const value = input.value.trim();
+      if (value === "") return;
+
+      addPlanToList(day, value);
+      input.value = "";
+
+      // 계획을 로컬 스토리지에 저장
+      savePlans();
+    }
+
+    function addPlanToList(day, plan) {
+      const list = document.getElementById(`list${day}`);
+      const li = document.createElement("li");
+      li.textContent = plan;
+
+      const deleteBtn = document.createElement("button");
+      deleteBtn.textContent = "❌";
+      deleteBtn.onclick = function() {
+        list.removeChild(li);
+        savePlans();
+      };
+
+      li.appendChild(deleteBtn);
+      list.appendChild(li);
+    }
+
+    // 일정을 localStorage에 저장하는 함수
+    function savePlans() {
+      const plans = [];
+      for (let i = 1; i <= dayCount; i++) {
+        const dayPlan = [];
+        const list = document.getElementById(`list${i}`);
+        const items = list.getElementsByTagName("li");
+        for (let item of items) {
+          dayPlan.push(item.textContent.replace("❌", "").trim());
+        }
+        plans.push(dayPlan);
+      }
+      localStorage.setItem('travelPlans', JSON.stringify(plans));
+    }
+  </script>
+</body>
+</html>
 
 ---
 
-## 2. UX · UI 개선
+## 2. 회원 정보를 저장할 수 있는 로그인, 회원가입란 만들기
 
-| 페이지 | 보강 포인트 | 구체적 제안 |
-|--------|-------------|-------------|
-| **메인** | “이 달의 여행지” 실사 사진 & 슬라이더 | Swiper.js, Glide.js 등 |
-| **항공권** | ① 로딩 중 애니메이션 없음 <br>② 정렬/필터 없음 | `@keyframes spin` 스피너, 가격/출발시각 정렬 추가 |
-| **호텔** | ① 대·소문자, 영문 입력 대응 <br>② 현재 선택된 국가 시각화 | `.toLowerCase()` 처리, `selectedCountry.textContent` 추가 |
-| **플래너** | ① 일정 순서 변경 불가 <br>② 하루/전체 삭제 버튼 없음 | Sortable.js로 Drag & Drop, 삭제 confirm창 |
-| **성향 테스트** | ① 누적 점수 없이 “마지막 답”만 반영됨 <br>② 진행도 UI 없음 | 점수 누적 배열 → 결과 계산 / 진행바 추가 |
+#수정된 코드
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>로그인 - GoVoyage</title>
+  <style>
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background-color: #fff9f5;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 400px;
+      margin: 5rem auto;
+      background-color: #fff;
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    h1 {
+      text-align: center;
+      color: #ff7043;
+      margin-bottom: 2rem;
+    }
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+    input {
+      width: 100%;
+      padding: 0.8rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid #ccc;
+      border-radius: 0.5rem;
+    }
+    button {
+      width: 100%;
+      padding: 0.8rem;
+      background-color: #ff7043;
+      color: #fff;
+      font-weight: bold;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #f4511e;
+    }
+    .link {
+      text-align: center;
+      margin-top: 1rem;
+    }
+    .link a {
+      color: #ff7043;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>로그인</h1>
+    <form>
+      <label for="email">이메일</label>
+      <input type="email" id="email" placeholder="you@example.com" required />
+      
+      <label for="password">비밀번호</label>
+      <input type="password" id="password" placeholder="••••••••" required />
+      
+      <button type="submit">로그인</button>
+    </form>
+    <div class="link">
+      아직 회원이 아니신가요? <a href="signup.html">회원가입</a>
+    </div>
+  </div>
+</body>
+</html>
+```
 
----
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>회원가입 - GoVoyage</title>
+  <style>
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background-color: #fff9f5;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 400px;
+      margin: 5rem auto;
+      background-color: #fff;
+      padding: 2rem;
+      border-radius: 1rem;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    h1 {
+      text-align: center;
+      color: #ff7043;
+      margin-bottom: 2rem;
+    }
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+    input {
+      width: 100%;
+      padding: 0.8rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid #ccc;
+      border-radius: 0.5rem;
+    }
+    button {
+      width: 100%;
+      padding: 0.8rem;
+      background-color: #ff7043;
+      color: #fff;
+      font-weight: bold;
+      border: none;
+      border-radius: 0.5rem;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #f4511e;
+    }
+    .link {
+      text-align: center;
+      margin-top: 1rem;
+    }
+    .link a {
+      color: #ff7043;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>회원가입</h1>
+    <form>
+      <label for="name">이름</label>
+      <input type="text" id="name" placeholder="홍길동" required />
+      
+      <label for="email">이메일</label>
+      <input type="email" id="email" placeholder="you@example.com" required />
+      
+      <label for="password">비밀번호</label>
+      <input type="password" id="password" placeholder="••••••••" required />
+      
+      <button type="submit">회원가입</button>
+    </form>
+    <div class="link">
+      이미 계정이 있으신가요? <a href="login.html">로그인</a>
+    </div>
+  </div>
+</body>
+</html>
 
-## 3. 코드 구조 & 재사용성
+```
 
-- **CSS 분리**
-  - 각 페이지별 `style` → `/css/main.css`, `/css/hotel.css` 등 분리
-  - 색상 변수화: `:root { --primary: #ff7043; }`
+## 구현 화면
+<img width="1280" alt="image" src="https://github.com/user-attachments/assets/4e5a0e49-241f-4ee5-8750-b84432e006d9" />
 
-- **컴포넌트화**
-  - 헤더/푸터 → 별도 HTML 파일 → fetch로 삽입
-  - 향후 React/Vue 전환에도 대비 가능
+<img width="1280" alt="image" src="https://github.com/user-attachments/assets/7ac3bddb-13a2-4b3b-b2d6-8183abd07add" />
 
-- **ES 모듈 구조**
-  - 기능별 JS 분할: `hotel.js`, `planner.js` 등
-  - 공통 유틸 함수 파일 제작 (날짜/금액 포맷 등)
 
----
 
-## 4. 접근성 & SEO
-
-| 항목 | 조치 |
-|------|------|
-| **대체 텍스트** | 모든 `<img>`에 `alt` 속성 추가 |
-| **키보드 네비게이션** | `:hover` 의존 X → `:focus-visible` 스타일 추가 |
-| **메타 태그** | 페이지마다 `description`, `og:title`, `og:image` 설정 |
-| **색 대비** | 텍스트/배경 색상 대비 체크 (WCAG AA 기준 충족) |
-
----
-
-## 5. 성능 & 품질
-
-- **이미지 최적화**
-  - WebP 변환, 해상도별 소스 분리 (1x / 2x)
-
-- **Lighthouse 점검**
-  - Performance 90+, Accessibility 90+ 목표
-
-- **Service Worker**
-  - 핵심 리소스 캐싱 → 빠른 재방문 속도 향상
-
----
-
-## 6. 다음 단계 로드맵 (예시)
-
-### ✅ v0.9 (이번 주)
-- 호텔/항공 더미 → 실제 API 연결
-- 플래너 일정 로컬 저장 기능 추가
-
-### ✅ v1.0 (2주 후)
-- 로그인(OAuth) → 사용자별 일정 저장
-- 성향 테스트 점수 로직 개선 + 결과 페이지 추천 연결
-
-### ✅ v1.1 (다음 달)
-- 전면 반응형 점검, Lighthouse 90+ 확보
-- 다국어(EN/JP) 및 환율 지원
-
----
-
-### ✅ 개선 순서 추천
-
-> **① 공통 컴포넌트화**  
-> **② 호텔/항공 API 연동**  
-> **③ 플래너 저장 기능 개발**  
-> 순으로 개선하면 효율적입니다.
 
 
